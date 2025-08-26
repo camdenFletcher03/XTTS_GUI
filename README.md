@@ -13,6 +13,7 @@ It allows you to connect to the xtts server and use it's functions through a nic
 
 USE:
 Please first install the xtts_api_server onto your machine and have it running for this GUI. You will also need to have a copy of ffmpeg installed (and setup with an environment path variable for python to see it).
+(Please note that the save audio to file feature will not work when the xtts_api_server is run with the '--streaming-mode' flag)
 
 ffmpeg can be found here: https://ffmpeg.org/
 
