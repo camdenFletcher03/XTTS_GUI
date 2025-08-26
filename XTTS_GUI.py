@@ -71,16 +71,14 @@ class XTTS_GUI:
         btn_settings = tk.Frame(settings_frame)
         btn_settings.pack(pady=10)
 
-        self.refresh_btn = tk.Button(btn_settings, text="Refresh Voices", command=self.refresh_voices)
+        self.refresh_btn = tk.Button(btn_settings, text="Refresh", command=self.refresh_options)
         self.refresh_btn.pack(side=tk.LEFT, padx=5)
 
         self.preview_btn = tk.Button(btn_settings, text="Preview Voice", command=self.preview_voice)
         self.preview_btn.pack(side=tk.LEFT, padx=5)
 
-        # Load languages from server
-        self.load_languages()
-        # Load voices from server
-        self.refresh_voices()
+        # Load languages and voices from server
+        self.refresh_options()
 
     # -- Support functions --
 
@@ -89,27 +87,6 @@ class XTTS_GUI:
         print(f"[{prefix}]: {msg}")
         messagebox.showinfo(prefix, msg)
         
-    # Load available languages from /languages
-    def load_languages(self):
-        try:
-            url = f"{self.base_url.get().rstrip('/')}/languages"
-            response = requests.get(url)
-            if response.status_code == 200:
-                data = response.json()
-                self.language_map = data.get("languages", {})
-                lang_names = list(self.language_map.keys())
-                self.language_dropdown["values"] = lang_names
-                if "English" in self.language_map:
-                    self.language.set("English")
-                elif lang_names:
-                    self.language.set(lang_names[0])
-
-                print(f"Supported languages loaded from server: {lang_names}")
-            else:
-                self.notification_log("Error", f"Failed to load languages:\n{response.text}")
-        except Exception as e:
-            self.notification_log("Error", f"Could not connect to XTTS server:\n{e}")
-
     # Play audio from bytes
     def play_audio_bytes(self, audio_bytes, mime_type="audio/wav"):
         try:
@@ -198,6 +175,11 @@ class XTTS_GUI:
         except Exception as e:
             self.notification_log("Error", f"Could not save file:\n{e}")
 
+    def refresh_options(self):
+        self.refresh_languages()
+        self.refresh_voices()
+
+    # Load available voices from /speakers
     def refresh_voices(self):
         try:
             url = f"{self.base_url.get().rstrip('/')}/speakers"
@@ -216,9 +198,30 @@ class XTTS_GUI:
                 self.voice_dropdown["values"] = list(self.voice_map.keys())
                 if self.voice_map:
                     self.voice.set(list(self.voice_map.keys())[0])
-                print("Available voices refreshed:", list(self.voice_map.keys()))
+                print(f"Available voices loaded from server: {list(self.voice_map.keys())}")
             else:
                 self.notification_log("Error", f"Failed to fetch voices:\n{response.text}")
+        except Exception as e:
+            self.notification_log("Error", f"Could not connect to XTTS server:\n{e}")
+    
+    # Load available languages from /languages
+    def refresh_languages(self):
+        try:
+            url = f"{self.base_url.get().rstrip('/')}/languages"
+            response = requests.get(url)
+            if response.status_code == 200:
+                data = response.json()
+                self.language_map = data.get("languages", {})
+                lang_names = list(self.language_map.keys())
+                self.language_dropdown["values"] = lang_names
+                if "English" in self.language_map:
+                    self.language.set("English")
+                elif lang_names:
+                    self.language.set(lang_names[0])
+
+                print(f"Supported languages loaded from server: {lang_names}")
+            else:
+                self.notification_log("Error", f"Failed to load languages:\n{response.text}")
         except Exception as e:
             self.notification_log("Error", f"Could not connect to XTTS server:\n{e}")
 
