@@ -82,11 +82,13 @@ class XTTS_GUI:
         # Load voices from server
         self.refresh_voices()
 
+    # -- Support functions --
+
     # Logging helper
     def notification_log(self, prefix, msg):
         print(f"[{prefix}]: {msg}")
         messagebox.showinfo(prefix, msg)
-
+        
     # Load available languages from /languages
     def load_languages(self):
         try:
@@ -111,7 +113,7 @@ class XTTS_GUI:
     # Play audio from bytes
     def play_audio_bytes(self, audio_bytes, mime_type="audio/wav"):
         try:
-            fmt = "mp3" if "mp3" in mime_type or "mpeg" in mime_type else "wav"
+            fmt = self.set_file_type(mime_type)
             audio = AudioSegment.from_file(io.BytesIO(audio_bytes), format=fmt)
             audio = audio.set_frame_rate(44100).set_channels(2).set_sample_width(2)
             raw = audio.raw_data
@@ -154,7 +156,9 @@ class XTTS_GUI:
             self.notification_log("Error", f"{e}")
             return None, None
 
-    # Support functions 
+    def set_file_type(self, mime_type):
+        return "mp3" if "mp3" in mime_type or "mpeg" in mime_type else "wav"
+    
     def read_aloud(self):
         text = self.textbox.get("1.0", tk.END).strip()
         if not text:
@@ -169,24 +173,30 @@ class XTTS_GUI:
         if not text:
             self.notification_log("Warning", "Please enter some text.")
             return
-        folder = filedialog.askdirectory(title="Select Save Folder")
-        if not folder:
-            return
+
         audio_data, ctype = self.get_tts_audio(text)
-        if audio_data:
-            try:
-                fmt = "mp3" if "mp3" in ctype else "wav"
-                audio = AudioSegment.from_file(io.BytesIO(audio_data), format=fmt)
-                i = 1
-                while True:
-                    filepath = os.path.join(folder, f"tts_output_{i}.wav")
-                    if not os.path.exists(filepath):
-                        break
-                    i += 1
-                audio.export(filepath, format="wav")
-                self.notification_log("Saved", f"Audio saved to:\n{filepath}")
-            except Exception as e:
-                self.notification_log("Error", f"Could not save file:\n{e}")
+        if not audio_data:
+            return
+
+        # Determine format from TTS output
+        fmt = self.set_file_type(ctype)
+        ext = f".{fmt}"
+
+        # Ask user for save location and filename with appropriate extension
+        filepath = filedialog.asksaveasfilename(
+            title="Save Audio File",
+            defaultextension=ext,
+            filetypes=[(f"{fmt.upper()} files", f"*{ext}")]
+        )
+        if not filepath:
+            return
+
+        try:
+            audio = AudioSegment.from_file(io.BytesIO(audio_data), format=fmt)
+            audio.export(filepath, format=fmt)
+            self.notification_log("Saved", f"Audio saved to:\n{filepath}")
+        except Exception as e:
+            self.notification_log("Error", f"Could not save file:\n{e}")
 
     def refresh_voices(self):
         try:
