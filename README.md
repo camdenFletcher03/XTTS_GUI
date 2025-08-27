@@ -1,12 +1,13 @@
 
 ABOUT:
 This program is designed to provide a graphical user interface for the xtts_api_server project: https://github.com/daswer123/xtts-api-server
-It allows you to connect to the xtts server and use it's functions through a nice GUI. The GUI allows you to choose from a list of available voices and supported languages (loaded from the server endpoint) and playback text-to-speech audio directly through the GUI. It also supports saving tts text to .wav files into a folder of your choice. 
+It allows you to connect to the xtts server and use it's functions through a nice GUI. The GUI allows you to choose from a list of available voices and supported languages (loaded from the server endpoint) and playback text-to-speech audio directly through the GUI. It also supports saving tts text to .wav files into a folder of your choice. You can also process a .txt file into TTS audio line by line, or by sentences in the Batch TTS tab. 
 
 
 
 ![](screenshots/XTTS_GUI_Example1.jpg) 
 ![](screenshots/XTTS_GUI_Example2.jpg)
+![](screenshots/XTTS_GUI_Example3.jpg)
 
 
 
