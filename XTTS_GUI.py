@@ -7,6 +7,7 @@ import os
 from pydub import AudioSegment
 import re
 import threading
+import time
 
 # This program is designed to provide a graphical user interface for the xtts_api_server project: https://github.com/daswer123/xtts-api-server
 
@@ -272,6 +273,7 @@ class XTTS_GUI:
             total = len(parts)
             merged_audio = AudioSegment.silent(duration=0)
             fmt = "wav"
+            start_time = time.time()
 
             for i, part in enumerate(parts, 1):
                 if self.cancel_batch.is_set():
@@ -293,15 +295,18 @@ class XTTS_GUI:
                     self.root.after(0, lambda i=i, e=e: self.notification_log("Error", f"Could not save part {i}:\n{e}"))
 
             merged_path = os.path.join(outdir, f"{os.path.splitext(os.path.basename(infile))[0]}.{fmt}")
+            display_path = merged_path.replace('\\', '/') # It was bothering me that the 'Done' msg would have a "root/somefolder\output.wav" instead of "root/somefolder/output.wav"
             merged_audio.export(merged_path, format=fmt)
 
             if self.cleanup_temp.get():
                 for f in os.listdir(temp_dir):
                     os.remove(os.path.join(temp_dir, f))
                 os.rmdir(temp_dir)
+            
+            elapsed_time = time.time() - start_time
 
-            self.root.after(0, lambda: self.progress.config(text="Batch TTS complete!"))
-            self.root.after(0, lambda: self.notification_log("Done", f"Generated {total} parts.\nMerged file: {merged_path}"))
+            self.root.after(0, lambda: self.progress.config(text=f"Batch TTS completed in {round(elapsed_time, 2)} second(s)!"))
+            self.root.after(0, lambda: self.notification_log("Done", f"Generated {total} parts.\nMerged file: {display_path}"))
             self.root.after(0, lambda: self.cancel_btn.config(state="disabled"))
 
         self.run_in_thread(self.with_button_disabled(self.batch_btn, task))
