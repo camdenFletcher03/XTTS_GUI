@@ -6,8 +6,8 @@ It allows you to connect to the xtts server and use it's functions through a nic
 
 
 ![](screenshots/XTTS_GUI_Example1.jpg) 
-![](screenshots/XTTS_GUI_Example2.jpg)
 ![](screenshots/XTTS_GUI_Example3.jpg)
+![](screenshots/XTTS_GUI_Example2.jpg)
 
 
 
